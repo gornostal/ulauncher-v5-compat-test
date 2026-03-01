@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+"""
+Ulauncher API Compatibility Test Extension
+
+This extension tests various aspects of the Ulauncher v5 Extension API by
+rendering different types of items and actions to verify compatibility.
+"""
+
+import logging
+from ulauncher.api.client.Extension import Extension
+from ulauncher.api.client.EventListener import EventListener
+from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
+from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
+from ulauncher.api.shared.item.ExtensionSmallResultItem import ExtensionSmallResultItem
+from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
+from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
+from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
+from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
+from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
+from ulauncher.api.shared.action.OpenAction import OpenAction
+from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
+from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
+from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
+from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
+
+logger = logging.getLogger(__name__)
+
+
+class APICompatibilityTestExtension(Extension):
+    """Main extension class"""
+
+    def __init__(self):
+        super().__init__()
+        self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
+        self.subscribe(ItemEnterEvent, ItemEnterEventListener())
+
+
+class KeywordQueryEventListener(EventListener):
+    """Handles keyword query events and returns test items"""
+
+    def on_event(self, event, extension):
+        """
+        Return a list of items testing different aspects of the API
+        """
+        logger.info(f"KeywordQueryEvent: query='{event.get_argument()}'")
+
+        query = event.get_argument() or ""
+        items = []
+
+        # Test 1: ExtensionResultItem with HideWindowAction
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 1: ExtensionResultItem + HideWindowAction',
+            description='Click to hide window and close extension',
+            on_enter=HideWindowAction()
+        ))
+
+        # Test 2: ExtensionResultItem with CopyToClipboardAction
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 2: CopyToClipboardAction',
+            description='Click to copy text to clipboard',
+            on_enter=CopyToClipboardAction('Hello from Ulauncher API test!')
+        ))
+
+        # Test 3: ExtensionResultItem with DoNothingAction
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 3: DoNothingAction',
+            description='Click to do nothing',
+            on_enter=DoNothingAction()
+        ))
+
+        # Test 4: ExtensionResultItem with OpenUrlAction
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 4: OpenUrlAction',
+            description='Click to open a URL',
+            on_enter=OpenUrlAction('https://github.com/Ulauncher/Ulauncher')
+        ))
+
+        # Test 5: ExtensionResultItem with RunScriptAction
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 5: RunScriptAction',
+            description='Click to run a script (echo)',
+            on_enter=RunScriptAction('echo "Test script executed"')
+        ))
+
+        # Test 6: ExtensionResultItem with SetUserQueryAction
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 6: SetUserQueryAction',
+            description='Click to set user query',
+            on_enter=SetUserQueryAction('test new query')
+        ))
+
+        # Test 7: ExtensionResultItem with ExtensionCustomAction
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 7: ExtensionCustomAction (keep open)',
+            description='Click to trigger custom action with keep_app_open=True',
+            on_enter=ExtensionCustomAction(
+                {'test': 'custom_data', 'action': 'test7'},
+                keep_app_open=True
+            )
+        ))
+
+        # Test 8: ExtensionResultItem with ExtensionCustomAction (close app)
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 8: ExtensionCustomAction (close app)',
+            description='Click to trigger custom action with keep_app_open=False',
+            on_enter=ExtensionCustomAction(
+                {'test': 'custom_data', 'action': 'test8'},
+                keep_app_open=False
+            )
+        ))
+
+        # Test 9: ExtensionSmallResultItem
+        items.append(ExtensionSmallResultItem(
+            icon='images/icon.png',
+            name='Test 9: ExtensionSmallResultItem (no description)',
+            on_enter=HideWindowAction()
+        ))
+
+        # Test 10: Item with query argument
+        if query:
+            items.append(ExtensionResultItem(
+                icon='images/icon.png',
+                name=f'Test 10: Query argument echo',
+                description=f'You typed: "{query}"',
+                on_enter=CopyToClipboardAction(query)
+            ))
+        else:
+            items.append(ExtensionResultItem(
+                icon='images/icon.png',
+                name='Test 10: Query argument echo',
+                description='Type something after "test " to see it here',
+                on_enter=DoNothingAction()
+            ))
+
+        # Test 11: Extension preferences
+        try:
+            test_option = extension.preferences.get('test_option', 'N/A')
+            test_select = extension.preferences.get('test_select', 'N/A')
+            items.append(ExtensionResultItem(
+                icon='images/icon.png',
+                name='Test 11: Preferences',
+                description=f'test_option={test_option}, test_select={test_select}',
+                on_enter=DoNothingAction()
+            ))
+        except Exception as e:
+            logger.error(f"Error accessing preferences: {e}")
+            items.append(ExtensionResultItem(
+                icon='images/icon.png',
+                name='Test 11: Preferences (error)',
+                description=str(e),
+                on_enter=DoNothingAction()
+            ))
+
+        # Test 12: LaunchAppAction
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 12: LaunchAppAction',
+            description='Click to launch a system app (gedit)',
+            on_enter=LaunchAppAction('gedit')
+        ))
+
+        # Test 13: OpenAction with directory
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 13: OpenAction (directory)',
+            description='Click to open home directory',
+            on_enter=OpenAction(os.path.expanduser('~'))
+        ))
+
+        return RenderResultListAction(items)
+
+
+class ItemEnterEventListener(EventListener):
+    """Handles item enter/click events"""
+
+    def on_event(self, event, extension):
+        """
+        Handle item enter events from ExtensionCustomAction items
+        """
+        logger.info(f"ItemEnterEvent: data={event.get_data()}")
+
+        data = event.get_data()
+
+        if isinstance(data, dict):
+            action = data.get('action', 'unknown')
+
+            if action == 'test7':
+                return RenderResultListAction([
+                    ExtensionResultItem(
+                        icon='images/icon.png',
+                        name='Custom Action Result (Test 7)',
+                        description='This appeared after clicking Test 7',
+                        on_enter=HideWindowAction()
+                    )
+                ])
+
+            elif action == 'test8':
+                return RenderResultListAction([
+                    ExtensionResultItem(
+                        icon='images/icon.png',
+                        name='Custom Action Result (Test 8)',
+                        description='This appeared after clicking Test 8',
+                        on_enter=HideWindowAction()
+                    )
+                ])
+
+        return DoNothingAction()
+
+
+if __name__ == '__main__':
+    import os
+    APICompatibilityTestExtension().run()

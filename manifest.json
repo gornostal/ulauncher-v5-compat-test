@@ -1,0 +1,38 @@
+{
+  "required_api_version": "2",
+  "name": "API Compatibility Test",
+  "description": "Test extension for Ulauncher API compatibility",
+  "developer_name": "Compatibility Tester",
+  "icon": "images/icon.png",
+  "options": {
+    "query_debounce": 0.05
+  },
+  "preferences": [
+    {
+      "id": "test_keyword",
+      "type": "keyword",
+      "name": "Test Keyword",
+      "description": "Keyword to trigger compatibility tests",
+      "default_value": "test"
+    },
+    {
+      "id": "test_option",
+      "type": "input",
+      "name": "Test Option",
+      "description": "An input preference for testing",
+      "default_value": "default_value"
+    },
+    {
+      "id": "test_select",
+      "type": "select",
+      "name": "Test Select",
+      "description": "A select preference for testing",
+      "default_value": "option1",
+      "options": [
+        {"value": "option1", "text": "Option 1"},
+        {"value": "option2", "text": "Option 2"},
+        {"value": "option3", "text": "Option 3"}
+      ]
+    }
+  ]
+}
