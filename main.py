@@ -21,6 +21,7 @@ from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
 from ulauncher.api.shared.action.SetUserQueryAction import SetUserQueryAction
+from ulauncher.api.shared.action.ActionList import ActionList
 from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
 
 logger = logging.getLogger(__name__)
@@ -189,6 +190,17 @@ class KeywordQueryEventListener(EventListener):
             name='Test 13: OpenAction (directory)',
             description='Click to open home directory',
             on_enter=OpenAction(os.path.expanduser('~'))
+        ))
+
+        # Test 14: ActionList (multiple actions in sequence)
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 14: ActionList',
+            description='Click to run CopyToClipboard + SetUserQuery together',
+            on_enter=ActionList([
+                CopyToClipboardAction('ActionList test'),
+                SetUserQueryAction('action list done')
+            ])
         ))
 
         return RenderResultListAction(items)
