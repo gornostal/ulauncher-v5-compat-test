@@ -20,19 +20,26 @@
       "type": "input",
       "name": "Test Option",
       "description": "An input preference for testing",
-      "default_value": "default_value"
+      "default_value": "This is a default value for testing"
     },
     {
       "id": "test_select",
       "type": "select",
       "name": "Test Select",
       "description": "A select preference for testing",
-      "default_value": "option1",
+      "default_value": "option2",
       "options": [
         {"value": "option1", "text": "Option 1"},
         {"value": "option2", "text": "Option 2"},
         {"value": "option3", "text": "Option 3"}
       ]
+    },
+    {
+      "id": "test_text",
+      "type": "text",
+      "name": "Test Text",
+      "description": "A multiline text preference for testing (renders as textarea)",
+      "default_value": "Hello\nWorld"
     }
   ]
 }

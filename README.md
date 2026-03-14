@@ -64,6 +64,7 @@ Tests different preference types:
 - Keyword preference (`test_keyword`)
 - Input preference (`test_option`)
 - Select preference (`test_select`)
+- Text preference (`test_text`) - renders as a textarea for multiline input
 
 ### 5. **Query Arguments**
 Tests passing and handling query arguments (Test 10)

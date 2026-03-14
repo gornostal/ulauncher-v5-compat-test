@@ -9,7 +9,7 @@ rendering different types of items and actions to verify compatibility.
 import logging
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
+from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent, PreferencesUpdateEvent, SystemExitEvent, PreferencesEvent
 from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 from ulauncher.api.shared.item.ExtensionSmallResultItem import ExtensionSmallResultItem
 from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
@@ -33,6 +33,9 @@ class APICompatibilityTestExtension(Extension):
         super().__init__()
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterEventListener())
+        self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
+        self.subscribe(SystemExitEvent, SystemExitEventListener())
+        self.subscribe(PreferencesEvent, PreferencesEventListener())
 
 
 class KeywordQueryEventListener(EventListener):
@@ -46,6 +49,18 @@ class KeywordQueryEventListener(EventListener):
 
         query = event.get_argument() or ""
         items = []
+
+        # Test 0: KeywordQueryEvent and Query object methods
+        query_obj = event.get_query()
+        items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name='Test 0: KeywordQueryEvent & Query methods',
+            description=(
+                f'event: get_argument={repr(event.get_argument())}, get_keyword={repr(event.get_keyword())}'
+                f' | query: get_argument={repr(query_obj.get_argument())}, get_keyword={repr(query_obj.get_keyword())}, is_mode_active={query_obj.is_mode_active()}'
+            ),
+            on_enter=DoNothingAction()
+        ))
 
         # Test 1: ExtensionResultItem with HideWindowAction
         items.append(ExtensionResultItem(
@@ -128,7 +143,7 @@ class KeywordQueryEventListener(EventListener):
         if query:
             items.append(ExtensionResultItem(
                 icon='images/icon.png',
-                name=f'Test 10: Query argument echo',
+                name='Test 10: Query argument echo',
                 description=f'You typed: "{query}"',
                 on_enter=CopyToClipboardAction(query)
             ))
@@ -144,10 +159,11 @@ class KeywordQueryEventListener(EventListener):
         try:
             test_option = extension.preferences.get('test_option', 'N/A')
             test_select = extension.preferences.get('test_select', 'N/A')
+            test_text = extension.preferences.get('test_text', 'N/A')
             items.append(ExtensionResultItem(
                 icon='images/icon.png',
                 name='Test 11: Preferences',
-                description=f'test_option={test_option}, test_select={test_select}',
+                description=f'test_option={test_option}, test_select={test_select}, test_text={repr(test_text)}',
                 on_enter=DoNothingAction()
             ))
         except Exception as e:
@@ -213,6 +229,27 @@ class ItemEnterEventListener(EventListener):
                 ])
 
         return DoNothingAction()
+
+
+class PreferencesUpdateEventListener(EventListener):
+    """Handles preference update events"""
+
+    def on_event(self, event, extension):
+        logger.info(f"PreferencesUpdateEvent: id={event.id}, old_value={repr(event.old_value)}, new_value={repr(event.new_value)}")
+
+
+class SystemExitEventListener(EventListener):
+    """Handles system exit events"""
+
+    def on_event(self, event, extension):
+        logger.info(f"SystemExitEvent: {event.__dict__}")
+
+
+class PreferencesEventListener(EventListener):
+    """Handles preferences load events"""
+
+    def on_event(self, event, extension):
+        logger.info(f"PreferencesEvent: preferences={event.preferences}")
 
 
 if __name__ == '__main__':
