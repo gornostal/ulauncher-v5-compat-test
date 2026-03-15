@@ -26,12 +26,34 @@ from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAct
 
 logger = logging.getLogger(__name__)
 
+PAGE_SIZE = 6
+
+
+def paginate_items(items, page):
+    """Return a page of items (PAGE_SIZE per page) with a 'More' item if there are more."""
+    start = page * PAGE_SIZE
+    page_items = items[start:start + PAGE_SIZE]
+
+    if start + PAGE_SIZE < len(items):
+        page_items.append(ExtensionResultItem(
+            icon='images/icon.png',
+            name=f'More... ({len(items) - start - PAGE_SIZE} remaining)',
+            description='Show next page of results',
+            on_enter=ExtensionCustomAction(
+                {'action': 'next_page', 'page': page + 1},
+                keep_app_open=True
+            )
+        ))
+
+    return RenderResultListAction(page_items)
+
 
 class APICompatibilityTestExtension(Extension):
     """Main extension class"""
 
     def __init__(self):
         super().__init__()
+        self._cached_items = []
         self.subscribe(KeywordQueryEvent, KeywordQueryEventListener())
         self.subscribe(ItemEnterEvent, ItemEnterEventListener())
         self.subscribe(PreferencesUpdateEvent, PreferencesUpdateEventListener())
@@ -203,7 +225,8 @@ class KeywordQueryEventListener(EventListener):
             ])
         ))
 
-        return RenderResultListAction(items)
+        extension._cached_items = items
+        return paginate_items(items, 0)
 
 
 class ItemEnterEventListener(EventListener):
@@ -219,6 +242,10 @@ class ItemEnterEventListener(EventListener):
 
         if isinstance(data, dict):
             action = data.get('action', 'unknown')
+
+            if action == 'next_page':
+                page = data.get('page', 0)
+                return paginate_items(extension._cached_items, page)
 
             if action == 'test7':
                 return RenderResultListAction([
