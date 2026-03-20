@@ -16,7 +16,6 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.HideWindowAction import HideWindowAction
 from ulauncher.api.shared.action.CopyToClipboardAction import CopyToClipboardAction
 from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
-from ulauncher.api.shared.action.LaunchAppAction import LaunchAppAction
 from ulauncher.api.shared.action.OpenAction import OpenAction
 from ulauncher.api.shared.action.OpenUrlAction import OpenUrlAction
 from ulauncher.api.shared.action.RunScriptAction import RunScriptAction
@@ -197,14 +196,6 @@ class KeywordQueryEventListener(EventListener):
                 description=str(e),
                 on_enter=DoNothingAction()
             ))
-
-        # Test 12: LaunchAppAction
-        items.append(ExtensionResultItem(
-            icon='images/icon.png',
-            name='Test 12: LaunchAppAction',
-            description='Click to launch a system app (gedit)',
-            on_enter=LaunchAppAction('gedit')
-        ))
 
         # Test 13: OpenAction with directory
         items.append(ExtensionResultItem(
