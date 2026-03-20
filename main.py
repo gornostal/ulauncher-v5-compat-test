@@ -79,7 +79,7 @@ class KeywordQueryEventListener(EventListener):
             name='Test 0: KeywordQueryEvent & Query methods',
             description=(
                 f'event: get_argument={repr(event.get_argument())}, get_keyword={repr(event.get_keyword())}'
-                f' | query: get_argument={repr(query_obj.get_argument())}, get_keyword={repr(query_obj.get_keyword())}, is_mode_active={query_obj.is_mode_active()}'
+                f' | query: get_argument={repr(query_obj.get_argument())}, get_keyword={repr(query_obj.get_keyword())}'
             ),
             on_enter=DoNothingAction()
         ))
